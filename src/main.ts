@@ -5,11 +5,11 @@ import Plyr, { type PlyrEvent } from 'plyr';
 import { GM_xmlhttpRequest } from '$';
 
 let tries = 0;
-let firstSaintIFrame = document.querySelector('.saint-iframe');
+let firstSaintIFrame = document.querySelector('iframe[src^="https://saint"]');
 
-while (tries < 5 && !firstSaintIFrame) {
+while (tries < 10 && !firstSaintIFrame) {
   firstSaintIFrame = document.querySelector('.saint-iframe');
-  await new Promise((resolve) => setTimeout(() => resolve(true), 1000));
+  await new Promise((resolve) => setTimeout(() => resolve(true), 500));
   tries++;
 }
 
@@ -17,7 +17,7 @@ if (firstSaintIFrame) {
   console.log('[saint-embeds-fixer]: Found at-least one saint iframe. Initializing...');
 
   document.querySelectorAll('.message--post').forEach((el) => {
-    el.querySelectorAll('.saint-iframe').forEach((el) => {
+    el.querySelectorAll('iframe[src^="https://saint"]').forEach((el) => {
       const url = (el as HTMLIFrameElement).src;
 
       if (!url) {

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Saint Embeds Fixer
 // @namespace    https://github.com/xdegeneratex
-// @version      1.0.0
+// @version      1.0.1
 // @author       xdegeneratex
 // @license      WTFPL; http://www.wtfpl.net/txt/copying/
 // @icon         https://simp4.jpg.church/simpcityIcon192.png
@@ -2296,16 +2296,16 @@
   Plyr.defaults = cloneDeep(defaults);
   var _GM_xmlhttpRequest = /* @__PURE__ */ (() => typeof GM_xmlhttpRequest != "undefined" ? GM_xmlhttpRequest : void 0)();
   let tries = 0;
-  let firstSaintIFrame = document.querySelector(".saint-iframe");
-  while (tries < 5 && !firstSaintIFrame) {
+  let firstSaintIFrame = document.querySelector('iframe[src^="https://saint"]');
+  while (tries < 10 && !firstSaintIFrame) {
     firstSaintIFrame = document.querySelector(".saint-iframe");
-    await( new Promise((resolve) => setTimeout(() => resolve(true), 1e3)));
+    await( new Promise((resolve) => setTimeout(() => resolve(true), 500)));
     tries++;
   }
   if (firstSaintIFrame) {
     console.log("[saint-embeds-fixer]: Found at-least one saint iframe. Initializing...");
     document.querySelectorAll(".message--post").forEach((el) => {
-      el.querySelectorAll(".saint-iframe").forEach((el2) => {
+      el.querySelectorAll('iframe[src^="https://saint"]').forEach((el2) => {
         const url = el2.src;
         if (!url) {
           return false;
