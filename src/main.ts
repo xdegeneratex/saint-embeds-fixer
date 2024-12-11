@@ -14,7 +14,7 @@ while (tries < 10 && !firstSaintIFrame) {
 }
 
 if (firstSaintIFrame) {
-  console.log('[saint-embeds-fixer]: Found at-least one saint iframe. Initializing...');
+  console.log('[saint-embeds-fixer]: Found at-least one saint embed. Initializing...');
 
   document.querySelectorAll('.message--post').forEach((el) => {
     el.querySelectorAll('iframe[src^="https://saint"]').forEach((el) => {
@@ -36,9 +36,10 @@ if (firstSaintIFrame) {
         onload: (response) => {
           const ogImageMetaEl = response.response.querySelector('meta[property="og:image"]');
           const posterURL = ogImageMetaEl ? (ogImageMetaEl as HTMLMetaElement).content : undefined;
-          const matches = /saint\d\.\w+\/d\/.*?(?=')/.exec(response.response.body.innerHTML);
+          const matches = /\/d\/.*?(?=')/.exec(response.response.body.innerHTML);
+          const defaultPlayerURL = response.response.querySelector('source')?.src;
 
-          if (!matches || !matches.length) {
+          if (!defaultPlayerURL || !matches || !matches.length) {
             return;
           }
 
@@ -46,64 +47,58 @@ if (firstSaintIFrame) {
             playerElement.setAttribute('data-poster', posterURL);
           }
 
-          const downloadPageURL = `https://${matches[0]}`;
+          const saintOrigin = new URL(defaultPlayerURL).origin;
 
-          GM_xmlhttpRequest({
-            url: downloadPageURL,
-            responseType: 'document',
-            onload: (downloadPageResponse) => {
-              const playbackURL = downloadPageResponse.response.querySelector('a')?.getAttribute('href');
+          const playbackURL = `${saintOrigin}/api/download.php?file=${matches[0].replace('/d/', '')}`;
 
-              if (!playbackURL) {
-                return;
-              }
+          if (!playbackURL) {
+            return;
+          }
 
-              setTimeout(() => {
-                const instance = new Plyr(playerElement, {
-                  autoplay: false,
-                  ratio: '16:9',
-                  controls: [
-                    'play-large',
-                    'play',
-                    'progress',
-                    'current-time',
-                    'mute',
-                    'volume',
-                    'settings',
-                    'pip',
-                    'airplay',
-                    'fullscreen',
-                    'download',
+          setTimeout(() => {
+            const instance = new Plyr(playerElement, {
+              autoplay: false,
+              ratio: '16:9',
+              controls: [
+                'play-large',
+                'play',
+                'progress',
+                'current-time',
+                'mute',
+                'volume',
+                'settings',
+                'pip',
+                'airplay',
+                'fullscreen',
+                'download',
+              ],
+              // @ts-expect-error Incomplete type definition.
+              urls: {
+                download: playbackURL,
+              },
+            });
+            let initialized = false;
+            instance.on('play', (e: PlyrEvent) => {
+              if (!initialized) {
+                instance.source = {
+                  type: 'video',
+                  sources: [
+                    {
+                      src: playbackURL,
+                    },
                   ],
-                  // @ts-expect-error Incomplete type definition.
-                  urls: {
-                    download: playbackURL,
-                  },
-                });
-                let initialized = false;
-                instance.on('play', (e: PlyrEvent) => {
-                  if (!initialized) {
-                    instance.source = {
-                      type: 'video',
-                      sources: [
-                        {
-                          src: playbackURL,
-                        },
-                      ],
-                    };
-                    initialized = true;
-                    instance.play();
-                  }
-                });
-              }, 250);
-            },
-          });
+                };
+                initialized = true;
+                instance.play();
+              }
+            });
+          }, 250);
         },
       });
     });
   });
 } else {
-  console.log('[saint-embeds-fixer]: No saint iframe found. Exiting!');
+  console.log('[saint-embeds-fixer]: No saint embed found. Exiting!');
 }
 
 export default {};

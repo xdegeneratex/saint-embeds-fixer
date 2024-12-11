@@ -15,7 +15,7 @@ export default defineConfig({
         'match': ['https://simpcity.su/threads/*'],
         'run-at': 'document-start',
         'author': 'xdegeneratex',
-        'version': '1.0.1',
+        'version': '1.0.2',
         'connect': ['saint2.su', 'saint2.pk', 'saint2.cr'],
         'license': 'WTFPL; http://www.wtfpl.net/txt/copying/',
         'downloadURL': 'https://github.com/xdegeneratex/saint-embeds-fixer/raw/main/dist/build.user.js',
